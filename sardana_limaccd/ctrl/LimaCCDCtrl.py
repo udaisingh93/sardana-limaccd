@@ -121,7 +121,7 @@ class LimaCtrlMixin(object):
             DefaultValue: 4,
             Description: 'LimaCCDs DataArrayVersion.'
                          'Supported versions are 2 (LimaCCDs <1.9.17)'
-                         '3 (>=1.9.17) and 4 (>=1.10)'
+                         'and 3 (>1.9.17)'
         },
         'WindowsSaving': {
             Type: bool,
@@ -231,8 +231,26 @@ class LimaCtrlMixin(object):
             MaxDimSize: (1000000,)},
     }
 
-    axis_attributes = {}
-
+    axis_attributes = {
+        'last_image_saved':{
+            Type: int,
+            Access: DataAccess.ReadOnly,
+            Description: "Get last saved image"
+            
+        },
+        'last_image_ready':{
+            Type: int,
+            Access: DataAccess.ReadOnly,
+            Description: "Get last saved ready"
+            
+        },
+        'Lima_DeviceName':{
+        	Type: str,
+        	Access: DataAccess.ReadOnly,
+        	Description: "Lima Device url"
+        }
+        
+    }
     def __init__(self, ctrl_class):
         self._ctrl_class = ctrl_class
         self._lima = Lima(
@@ -432,7 +450,14 @@ class LimaCtrlMixin(object):
         attrs = self._ctrl_class.GetAxisAttributes(self, axis)
         attrs['Value'][MaxDimSize] = self.MaxDimSize
         return attrs
-
+    def GetAxisExtraPar(self,axis,name):
+        name = name.lower()
+        if name == "last_image_saved":
+            return self._lima['last_image_saved']
+        elif name == "last_image_ready":
+            return self._lima['last_image_ready']
+        elif name == "lima_devicename":
+            return self.LimaCCDDeviceName
 
 class LimaCCDOneDController(LimaCtrlMixin, OneDController, Referable):
     """
